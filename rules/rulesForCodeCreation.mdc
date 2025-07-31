@@ -1,0 +1,23 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+---
+
+description: Rules for code creation
+globs:
+alwaysApply: true
+
+---
+
+1. Always have into account the project context in ./README.md and ./backend/README.md
+2. If you are requested to fix an error, first analyse the root cause thoroughly before suggesting any changes.
+3. Propose a comprehensive architectural solution rather than patching code.
+4. Focus on a minimum viable fix that directly addresses the core issue
+5. Consider the entire system architecture and flow before making changes
+6. Make sure to make the changes respect SOLID and DRY principles.
+7. Code should be modular and each function should have distinct responsibilities.
+8. Limit the changes to what you are asked.
+9. Make sure to follow KISS mode - Keep It Simple Stupid.
