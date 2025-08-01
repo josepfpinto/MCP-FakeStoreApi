@@ -3,14 +3,28 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "start:stdio": "ts-node src/index.ts --stdio",
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev:stdio": "nodemon --exec 'ts-node src/index.ts --stdio'",
+    "dev:ngrok": "echo '🚀 Starting server with ngrok instructions...' && echo '1. Run: yarn dev' && echo '2. In another terminal: ngrok http 3000' && echo '3. Use the ngrok HTTPS URL for LLM tools' && yarn dev",
+    "build": "tsc",
+    "test": "echo \"Tests not implemented yet\" && exit 1",
+    "help:ngrok": "echo '📋 ngrok Development Setup:' && echo '' && echo '1. Install ngrok: brew install ngrok/ngrok/ngrok' && echo '2. Sign up: https://ngrok.com/' && echo '3. Set auth token: ngrok config add-authtoken YOUR_TOKEN' && echo '4. Start server: yarn dev' && echo '5. Expose server: ngrok http 3000' && echo '6. Use HTTPS URL in LangChain/OpenAI tools' && echo '' && echo '🔗 Example ngrok URL: https://abc123.ngrok.io/mcp'"
+  },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.1",
     "axios": "^1.11.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "express": "^5.1.0",
+    "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.1.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
