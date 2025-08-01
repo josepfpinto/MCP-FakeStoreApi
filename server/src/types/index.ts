@@ -104,3 +104,25 @@ export interface TokenPayload {
   user: string; // username
   iat: number; // issued at
 }
+
+// API Key interfaces
+export interface ApiKey {
+  id: string;
+  userId: number;
+  name: string;
+  key: string; // hashed
+  lastUsed?: Date;
+  createdAt: Date;
+  isActive: boolean;
+}
+
+export interface CreateApiKeyRequest {
+  name: string;
+}
+
+export interface CreateApiKeyResponse {
+  id: string;
+  name: string;
+  key: string; // raw key (only returned once)
+  createdAt: Date;
+}

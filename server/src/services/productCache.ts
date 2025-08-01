@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Product } from "../types";
+import logger from "../utils/logger";
 
 class ProductCache {
   private products: Product[] = [];
@@ -9,33 +10,33 @@ class ProductCache {
 
   async initialize(): Promise<void> {
     try {
-      console.log("🏪 CACHE: Initializing product cache...");
+      logger.info("🏪 CACHE: Initializing product cache...");
 
       // Fetch all products
-      console.log("📦 CACHE: Fetching all products from Fake Store API...");
+      logger.info("📦 CACHE: Fetching all products from Fake Store API...");
       const productsResponse = await axios.get<Product[]>(
         `${this.FAKE_STORE_API_BASE}/products`
       );
       this.products = productsResponse.data;
-      console.log(`📦 CACHE: Loaded ${this.products.length} products`);
+      logger.info(`📦 CACHE: Loaded ${this.products.length} products`);
 
       // Fetch all categories
-      console.log("📂 CACHE: Fetching categories from Fake Store API...");
+      logger.info("📂 CACHE: Fetching categories from Fake Store API...");
       const categoriesResponse = await axios.get<string[]>(
         `${this.FAKE_STORE_API_BASE}/products/categories`
       );
       this.categories = categoriesResponse.data;
-      console.log(
+      logger.info(
         `📂 CACHE: Loaded ${this.categories.length} categories:`,
         this.categories
       );
 
       this.isInitialized = true;
-      console.log(
+      logger.info(
         `✅ CACHE: Product cache initialized successfully with ${this.products.length} products and ${this.categories.length} categories`
       );
     } catch (error) {
-      console.error("Failed to initialize product cache:", error);
+      logger.error("Failed to initialize product cache:", error);
       throw new Error("Failed to initialize product cache");
     }
   }

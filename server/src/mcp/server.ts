@@ -10,6 +10,7 @@ import { SessionManager } from "./session";
 import { ToolHandlers } from "./tools";
 import { ResourceHandlers } from "./resources";
 import { authenticateUser } from "../controllers/authController";
+import { validateApiKey } from "../services/apiKeyService";
 import { User } from "../types";
 
 // Extend Express Request type
@@ -24,48 +25,78 @@ async function authenticateRequest(
   next: express.NextFunction
 ) {
   try {
-    // Extract credentials from custom header or body
+    // Method 1: API Key Authentication (preferred for LLMs)
+    const apiKeyHeader = req.headers["x-mcp-api-key"];
+    if (apiKeyHeader && typeof apiKeyHeader === "string") {
+      const validation = validateApiKey(apiKeyHeader);
+      if (validation.isValid && validation.userId) {
+        // Create minimal user object for session
+        req.user = {
+          id: validation.userId,
+          firstName: "API User",
+          username: `user_${validation.userId}`,
+        };
+        console.log(
+          "✅ MCP AUTH: API key validated for user:",
+          validation.userId
+        );
+        return next();
+      } else {
+        return res.status(401).json({
+          jsonrpc: "2.0",
+          id: req.body?.id || null,
+          error: { code: -32001, message: "Invalid API key" },
+        });
+      }
+    }
+
+    // Method 2: Base64 Credentials Authentication (fallback)
     const authHeader = req.headers["x-mcp-auth"];
-    if (!authHeader) {
-      return res.status(401).json({
-        jsonrpc: "2.0",
-        id: req.body?.id || null,
-        error: {
-          code: -32001,
-          message: "Authentication required",
-          data: "Include X-MCP-Auth header with base64(username:password)",
-        },
-      });
+    if (authHeader && typeof authHeader === "string") {
+      // Decode credentials
+      const [username, password] = Buffer.from(authHeader, "base64")
+        .toString()
+        .split(":");
+
+      if (!username || !password) {
+        return res.status(401).json({
+          jsonrpc: "2.0",
+          id: req.body?.id || null,
+          error: { code: -32001, message: "Invalid authentication format" },
+        });
+      }
+
+      // Authenticate user
+      const loginResult = await authenticateUser({ username, password });
+      if (!loginResult.success || !loginResult.user) {
+        return res.status(401).json({
+          jsonrpc: "2.0",
+          id: req.body?.id || null,
+          error: { code: -32001, message: "Invalid credentials" },
+        });
+      }
+
+      // Store user in request for session manager
+      req.user = loginResult.user;
+      console.log(
+        "✅ MCP AUTH: Credentials validated for user:",
+        req.user.username
+      );
+      return next();
     }
 
-    // Decode credentials
-    const [username, password] = Buffer.from(authHeader as string, "base64")
-      .toString()
-      .split(":");
-
-    if (!username || !password) {
-      return res.status(401).json({
-        jsonrpc: "2.0",
-        id: req.body?.id || null,
-        error: { code: -32001, message: "Invalid authentication format" },
-      });
-    }
-
-    // Authenticate user
-    const loginResult = await authenticateUser({ username, password });
-    if (!loginResult.success || !loginResult.user) {
-      return res.status(401).json({
-        jsonrpc: "2.0",
-        id: req.body?.id || null,
-        error: { code: -32001, message: "Invalid credentials" },
-      });
-    }
-
-    // Store user in request for session manager
-    req.user = loginResult.user;
-    next();
+    // No authentication provided
+    return res.status(401).json({
+      jsonrpc: "2.0",
+      id: req.body?.id || null,
+      error: {
+        code: -32001,
+        message: "Authentication required",
+        data: "Include X-MCP-API-Key header with API key or X-MCP-Auth header with base64(username:password)",
+      },
+    });
   } catch (error: any) {
-    console.error("❌ AUTH: Authentication failed:", error.message);
+    console.error("❌ MCP AUTH: Authentication failed:", error.message);
     return res.status(500).json({
       jsonrpc: "2.0",
       id: req.body?.id || null,

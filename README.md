@@ -7,9 +7,15 @@ A Model Context Protocol (MCP) server implementation that provides an AI-powered
 This project consists of two main components:
 
 - **Backend MCP Server**: A Node.js/TypeScript server that implements the Model Context Protocol (MCP) for AI agents to interact with the Fake Store API
-- **Frontend Client**: A React/TypeScript web application with chat interface using LangChain and OpenAI (to be implemented)
+- **Frontend Client**: A React/TypeScript web application with authentication, chat interface, and API key management (Phase 2 complete)
 
 The system allows users to interact with a shopping assistant using natural language. The frontend uses LangChain to configure OpenAI to call the MCP server (exposed via ngrok tunnel) as tools, enabling direct communication between cloud LLMs and the local shopping backend.
+
+### Implementation Status
+
+- ✅ **Phase 1**: Complete backend MCP server implementation
+- ✅ **Phase 2**: Frontend UI with authentication, protected routes, and API key management
+- 🚧 **Phase 3**: LangChain integration with OpenAI (upcoming)
 
 ## Server Implementation
 
@@ -50,6 +56,39 @@ server/
 - `remove_item` - Remove products from cart
 - `get_categories` - List all available product categories
 
+## Frontend Implementation
+
+### Architecture
+
+The React frontend follows modern best practices with TypeScript, Redux Toolkit for state management, and React Router for navigation:
+
+```
+client/
+├── src/
+│   ├── components/      # Reusable UI components
+│   ├── pages/           # Page-level components
+│   ├── store/           # Redux store and slices
+│   ├── hooks/           # Custom React hooks
+│   └── App.tsx          # Main application component
+```
+
+### Key Features
+
+1. **Authentication System**: Login page with username, password, and OpenAI API key
+2. **Protected Routes**: Route guards that redirect unauthenticated users
+3. **Chat Interface**: Modern chat UI ready for LangChain integration
+4. **API Key Management**: Full CRUD operations for MCP API keys
+5. **State Management**: Redux Toolkit for global state
+6. **Responsive Design**: Mobile-friendly Tailwind CSS styling
+
+### Pages & Components
+
+- **Login Page**: User authentication with form validation
+- **Chat Page**: Shopping assistant chat interface (UI only in Phase 2)
+- **API Keys Page**: Manage MCP API keys for LLM integration
+- **Protected Route**: Higher-order component for route protection
+- **Navigation**: Responsive header with user menu and logout
+
 ## Getting Started
 
 ### Prerequisites
@@ -67,29 +106,52 @@ git clone <repository-url>
 cd MCP-FakeStoreApi
 ```
 
-2. Install server dependencies:
+2. Install backend dependencies:
 
 ```bash
 cd server
 yarn install
 ```
 
-3. Create environment file (optional):
+3. Install frontend dependencies:
 
 ```bash
+cd ../client
+yarn install
+```
+
+4. Create environment file (optional):
+
+```bash
+cd ../server
 cp .env.example .env
 ```
 
-### Running the Server
+### Running the Application
 
-#### Development Mode
+#### Development Mode (Recommended)
+
+**Terminal 1: Start the Backend Server**
 
 ```bash
 cd server
 yarn dev
 ```
 
+The backend server will start on `http://localhost:3000`.
+
+**Terminal 2: Start the Frontend Client**
+
+```bash
+cd client
+yarn dev
+```
+
+The frontend will start on `http://localhost:5173` and open automatically in your browser.
+
 #### Production Mode
+
+**Backend:**
 
 ```bash
 cd server
@@ -97,7 +159,23 @@ yarn build
 yarn start
 ```
 
-The server will start on `http://localhost:3000` by default.
+**Frontend:**
+
+```bash
+cd client
+yarn build
+yarn preview
+```
+
+### Quick Start
+
+1. Start both backend and frontend in development mode (see above)
+2. Open `http://localhost:5173` in your browser
+3. Login with demo credentials:
+   - **Username**: `johnd`
+   - **Password**: `m38rmF$`
+   - **OpenAI API Key**: Your own OpenAI API key
+4. Explore the chat interface and API key management
 
 ### Testing the API
 
@@ -157,17 +235,57 @@ MCP-FakeStoreApi/
 │   │   └── index.ts       # Server entry point
 │   ├── package.json
 │   └── tsconfig.json
-├── client/                # Frontend React app (to be implemented)
+├── client/                # Frontend React application
+│   ├── src/
+│   │   ├── components/    # Reusable UI components
+│   │   ├── pages/         # Page components
+│   │   ├── store/         # Redux store & slices
+│   │   ├── hooks/         # Custom React hooks
+│   │   └── App.tsx        # Main app component
+│   ├── package.json
+│   ├── vite.config.ts     # Vite configuration
+│   └── tailwind.config.js # Tailwind CSS config
+├── PROTOCOL.md            # MCP protocol specification
 └── README.md
 ```
+
+## Authentication Flow
+
+The application implements a secure authentication flow:
+
+1. **User Login**: Users authenticate with Fake Store API credentials
+2. **JWT Token**: Backend returns JWT token for session management
+3. **MCP API Key Generation**: Automatic generation of MCP API key for LLM integration
+4. **Local Storage**: Tokens stored securely in browser's local storage
+5. **Protected Routes**: Frontend routes protected by authentication state
+6. **API Key Management**: Users can create, view, revoke, and delete MCP API keys
+
+### Frontend Features (Phase 2)
+
+- ✅ **Login System**: Complete authentication with form validation
+- ✅ **Protected Routing**: React Router with route guards
+- ✅ **Chat Interface**: Modern chat UI (ready for LangChain integration)
+- ✅ **API Key Management**: Full CRUD operations for MCP keys
+- ✅ **State Management**: Redux Toolkit with persistent storage
+- ✅ **Responsive Design**: Mobile-friendly Tailwind CSS
+- ✅ **Error Handling**: Comprehensive error states and user feedback
 
 ## Development
 
 ### Adding New Features
 
+**Backend:**
+
 1. **New MCP Actions**: Add to `src/types/index.ts` and implement in `src/controllers/mcpController.ts`
 2. **New Routes**: Create in `src/routes/` and register in `src/index.ts`
 3. **New Services**: Add to `src/services/` for external API interactions
+
+**Frontend:**
+
+1. **New Pages**: Create in `src/pages/` and add route in `src/App.tsx`
+2. **New Components**: Add to `src/components/` with TypeScript interfaces
+3. **New Redux State**: Create slices in `src/store/slices/` and add to store
+4. **New API Calls**: Add async thunks to relevant Redux slices
 
 ### Code Style
 
@@ -175,6 +293,8 @@ MCP-FakeStoreApi/
 - ESLint for code linting
 - Prettier for code formatting
 - Follow SOLID principles and DRY methodology
+- React functional components with hooks
+- Redux Toolkit for state management
 
 ## Local Deployment with ngrok
 
@@ -206,7 +326,15 @@ yarn dev
 # Server starts on http://localhost:3000
 ```
 
-#### Terminal 2: Expose via ngrok
+#### Terminal 2: Start the Frontend (Optional for ngrok testing)
+
+```bash
+cd client
+yarn dev
+# Frontend starts on http://localhost:5173
+```
+
+#### Terminal 3: Expose via ngrok
 
 ```bash
 ngrok http 3000
@@ -219,12 +347,12 @@ Session Status    online
 Forwarding        https://abc123.ngrok.io -> http://localhost:3000
 ```
 
-#### Configure LangChain/OpenAI
+#### Configure LangChain/OpenAI (Phase 3)
 
-Use the ngrok URL in your frontend LangChain configuration:
+In Phase 3, use the ngrok URL in your frontend LangChain configuration:
 
 ```typescript
-// In your React app
+// In your React app (Phase 3 implementation)
 const mcpServerUrl = "https://abc123.ngrok.io/mcp"; // Replace with your ngrok URL
 
 // Configure OpenAI tools to use this URL
@@ -239,6 +367,8 @@ const tools = [
   },
 ];
 ```
+
+**Note**: Phase 2 includes the frontend UI but not yet the LangChain integration. The chat interface is ready for Phase 3 implementation.
 
 ### Environment Variables
 

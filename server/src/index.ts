@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import productCache from "./services/productCache";
 import { createMCPServer } from "./mcp/server";
 import authRoutes from "./routes/auth";
+import apiKeyRoutes from "./routes/apiKeys";
+import logger from "./utils/logger";
 
 // Load environment variables
 dotenv.config();
@@ -13,9 +15,9 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     // Initialize product cache
-    console.log("🔄 Initializing product cache...");
+    logger.info("🔄 Initializing product cache...");
     await productCache.initialize();
-    console.log("✅ Product cache initialized successfully");
+    logger.info("✅ Product cache initialized successfully");
 
     // Create Express app for REST endpoints
     const app = express();
@@ -31,6 +33,7 @@ async function startServer() {
 
     // REST routes for frontend
     app.use("/", authRoutes);
+    app.use("/api-keys", apiKeyRoutes);
 
     // Create and mount MCP server for cloud LLMs
     const mcpServer = await createMCPServer();
@@ -38,27 +41,27 @@ async function startServer() {
 
     // Start server
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`🔐 REST API available for frontend authentication`);
-      console.log(`🤖 MCP server available at http://localhost:${PORT}/mcp`);
-      console.log(
+      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+      logger.info(`🔐 REST API available for frontend authentication`);
+      logger.info(`🤖 MCP server available at http://localhost:${PORT}/mcp`);
+      logger.info(
         `🌐 Expose via ngrok for cloud LLM access: ngrok http ${PORT}`
       );
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    logger.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 }
 
 // Handle graceful shutdown
 process.on("SIGTERM", () => {
-  console.log("SIGTERM received, shutting down gracefully");
+  logger.info("SIGTERM received, shutting down gracefully");
   process.exit(0);
 });
 
 process.on("SIGINT", () => {
-  console.log("SIGINT received, shutting down gracefully");
+  logger.info("SIGINT received, shutting down gracefully");
   process.exit(0);
 });
 

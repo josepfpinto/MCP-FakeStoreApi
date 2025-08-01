@@ -98,40 +98,111 @@ All MCP communication begins with capability negotiation.
 
 **Challenge**: MCP has no built-in authentication mechanism.
 
-**Solution**: User context via custom server capability
+**Solution**: HTTP header-based authentication with API keys
 
-### Set User Context (Custom Method)
+### Method 1: API Key Authentication (Recommended)
+
+**Header**: `X-MCP-API-Key: mcp_abc123...`
+
+API keys provide secure, revocable access without exposing user credentials.
+
+#### API Key Management Flow
+
+1. **User Login**: Authenticate via REST API (`POST /login`)
+2. **Generate API Key**: Create API key (`POST /api-keys`)
+3. **LLM Configuration**: Configure LLM with API key
+4. **MCP Requests**: LLM includes API key in headers
+
+#### Example MCP Request with API Key
+
+```bash
+curl -X POST 'http://localhost:3000/mcp' \
+  -H 'Content-Type: application/json' \
+  -H 'X-MCP-API-Key: mcp_abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234' \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "tools-1",
+    "method": "tools/list"
+  }'
+```
+
+### Method 2: Basic Credentials Authentication (Fallback)
+
+**Header**: `X-MCP-Auth: base64(username:password)`
+
+Direct credential authentication for development and testing.
+
+#### Example MCP Request with Credentials
+
+```bash
+# Generate auth header
+AUTH_HEADER=$(echo -n "johnd:m38rmF$" | base64)
+
+curl -X POST 'http://localhost:3000/mcp' \
+  -H 'Content-Type: application/json' \
+  -H 'X-MCP-Auth: am9obmQ6bTM4cm1GJA==' \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "tools-1",
+    "method": "tools/list"
+  }'
+```
+
+### API Key Management Endpoints
+
+#### Create API Key
+
+```bash
+POST /api-keys
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "name": "My LLM Client"
+}
+```
+
+**Response:**
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": "auth-1",
-  "method": "shopping/set_user_context",
-  "params": {
-    "username": "johnd",
-    "password": "m38rmF$"
+  "success": true,
+  "data": {
+    "id": "key_123",
+    "name": "My LLM Client",
+    "key": "mcp_abcd1234...",
+    "createdAt": "2024-01-15T10:30:00.000Z"
   }
 }
 ```
 
-### Response
+#### List API Keys
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "auth-1",
-  "result": {
-    "user": {
-      "id": 1,
-      "firstName": "john",
-      "username": "johnd"
-    },
-    "sessionId": "sess_abc123"
-  }
-}
+```bash
+GET /api-keys
+Authorization: Bearer <jwt_token>
 ```
 
-**Note**: All subsequent tool calls will use this user context automatically.
+#### Revoke API Key
+
+```bash
+PUT /api-keys/{keyId}/revoke
+Authorization: Bearer <jwt_token>
+```
+
+#### Delete API Key
+
+```bash
+DELETE /api-keys/{keyId}
+Authorization: Bearer <jwt_token>
+```
+
+**Security Features:**
+
+- API keys are hashed for storage
+- Keys can be revoked or deleted
+- Last used timestamps for monitoring
+- User-scoped key management
 
 ## Tools
 
