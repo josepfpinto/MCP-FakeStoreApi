@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { chatService } from "../../services/chatService";
@@ -36,6 +36,16 @@ const ChatPage: React.FC = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [chatServiceReady, setChatServiceReady] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   // Check chat service availability
   useEffect(() => {
@@ -130,6 +140,8 @@ const ChatPage: React.FC = () => {
             </Avatar>
           </MessageGroup>
         ))}
+        {/* Invisible div to enable auto-scroll to bottom */}
+        <div ref={messagesEndRef} />
       </MessagesContainer>
 
       {/* Input Container */}

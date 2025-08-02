@@ -5,16 +5,22 @@ export const ChatContainer = styled.div`
   flex-direction: column;
   flex: 1;
   background: #f9fafb;
-  min-height: 0; /* Allow flex item to shrink below content size */
+  height: 100vh; /* Full viewport height */
+  position: relative;
+  overflow: hidden; /* Prevent container overflow */
 `;
 
 export const MessagesContainer = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
+  padding-bottom: 120px; /* Space for fixed input container */
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: calc(
+    100vh - 120px
+  ); /* Constrain height leaving space for input */
 `;
 
 export const MessageGroup = styled.div<{ $sender: "user" | "assistant" }>`
@@ -75,9 +81,15 @@ export const Avatar = styled.div<{ $sender: "user" | "assistant" }>`
 `;
 
 export const InputContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: white;
   border-top: 1px solid #e5e7eb;
   padding: 1.5rem;
+  z-index: 10;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 export const InputForm = styled.form`

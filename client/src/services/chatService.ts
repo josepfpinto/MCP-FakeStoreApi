@@ -40,7 +40,10 @@ export class ChatService {
       const response = await axios.post(
         `${CHAT_API_BASE_URL}/api/v1/chat`,
         { message } as ChatRequest,
-        { headers }
+        {
+          headers,
+          timeout: 30000, // 30 second timeout
+        }
       );
 
       return response.data;
@@ -50,28 +53,79 @@ export class ChatService {
       // Handle network errors
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          // Server responded with error status
-          const errorMessage =
-            error.response.data?.message ||
-            error.response.data?.error ||
-            "Server error occurred";
-          return {
-            message: `❌ ${errorMessage}`,
-            is_error: true,
-          };
+          const status = error.response.status;
+          const errorData = error.response.data;
+
+          // Handle specific HTTP status codes
+          switch (status) {
+            case 401:
+              return {
+                message: "❌ Your session has expired. Please log in again.",
+                is_error: true,
+              };
+            case 403:
+              return {
+                message: "❌ You don't have permission to access this service.",
+                is_error: true,
+              };
+            case 429:
+              return {
+                message:
+                  "❌ Too many requests. Please wait a moment before trying again.",
+                is_error: true,
+              };
+            case 500:
+            case 502:
+            case 503:
+            case 504:
+              return {
+                message:
+                  "❌ The AI service is temporarily unavailable. Please try again in a few moments.",
+                is_error: true,
+              };
+            default:
+              // Server responded with error status
+              const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                `Server error (${status}) occurred`;
+              return {
+                message: `❌ ${errorMessage}`,
+                is_error: true,
+              };
+          }
         } else if (error.request) {
+          // Check for timeout
+          if (error.code === "ECONNABORTED") {
+            return {
+              message:
+                "❌ Request timed out. The AI service might be busy. Please try again.",
+              is_error: true,
+            };
+          }
+
           // Request was made but no response received
           return {
             message:
-              "❌ Unable to connect to AI assistant. Please check if the Python server is running.",
+              "❌ Unable to connect to AI assistant. Please check if the Python server is running and your internet connection.",
             is_error: true,
           };
         }
       }
 
+      // Handle specific error types
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        return {
+          message: "❌ Network error. Please check your internet connection.",
+          is_error: true,
+        };
+      }
+
       // Generic error fallback
       return {
-        message: "❌ An unexpected error occurred. Please try again.",
+        message: `❌ An unexpected error occurred: ${
+          (error as any)?.message ?? "Unknown error"
+        }. Please try again.`,
         is_error: true,
       };
     }

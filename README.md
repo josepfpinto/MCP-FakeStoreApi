@@ -11,12 +11,6 @@ This project consists of two main components:
 
 The system allows users to interact with a shopping assistant using natural language. The frontend uses LangChain to configure OpenAI to call the MCP server (exposed via ngrok tunnel) as tools, enabling direct communication between cloud LLMs and the local shopping backend.
 
-### Implementation Status
-
-- ✅ **Phase 1**: Complete backend MCP server implementation
-- ✅ **Phase 2**: Frontend UI with authentication, protected routes, and API key management
-- 🚧 **Phase 3**: LangChain integration with OpenAI (upcoming)
-
 ## Server Implementation
 
 ### Architecture
@@ -225,26 +219,41 @@ curl -X POST http://localhost:3000/api/mcp \
 
 ```
 MCP-FakeStoreApi/
-├── server/                 # Backend MCP server
+├── server/                 # Backend MCP server (Node.js/TypeScript)
 │   ├── src/
-│   │   ├── controllers/   # Request handlers
-│   │   ├── middleware/    # Auth & validation
-│   │   ├── routes/        # API routes
-│   │   ├── services/      # Business logic
-│   │   ├── types/         # TypeScript types
+│   │   ├── controllers/   # Request handlers & business logic
+│   │   ├── middleware/    # Auth, validation & error handling
+│   │   ├── routes/        # API route definitions
+│   │   ├── services/      # External API interactions
+│   │   ├── mcp/          # MCP protocol implementation
+│   │   ├── types/         # TypeScript type definitions
+│   │   ├── utils/         # Utility functions (retry, logger)
 │   │   └── index.ts       # Server entry point
+│   ├── tests/             # Backend test suites
 │   ├── package.json
+│   ├── jest.config.js     # Jest testing configuration
 │   └── tsconfig.json
 ├── client/                # Frontend React application
 │   ├── src/
 │   │   ├── components/    # Reusable UI components
-│   │   ├── pages/         # Page components
+│   │   ├── pages/         # Page-level components
 │   │   ├── store/         # Redux store & slices
 │   │   ├── hooks/         # Custom React hooks
+│   │   ├── services/      # API service classes
+│   │   ├── contexts/      # React contexts (Toast, etc.)
 │   │   └── App.tsx        # Main app component
+│   ├── tests/             # Frontend test suites
 │   ├── package.json
 │   ├── vite.config.ts     # Vite configuration
+│   ├── vitest.config.ts   # Vitest testing configuration
 │   └── tailwind.config.js # Tailwind CSS config
+├── llm-server/            # Python LLM integration server
+│   ├── app/
+│   │   ├── api/          # FastAPI endpoints
+│   │   ├── services/     # Business logic services
+│   │   └── models/       # Pydantic models
+│   ├── requirements.txt
+│   └── README.md
 ├── PROTOCOL.md            # MCP protocol specification
 └── README.md
 ```
@@ -368,7 +377,185 @@ const tools = [
 ];
 ```
 
-**Note**: Phase 2 includes the frontend UI but not yet the LangChain integration. The chat interface is ready for Phase 3 implementation.
+## Testing
+
+The project includes comprehensive test suites for both backend and frontend components.
+
+### Backend Testing (Node.js/Jest)
+
+The backend uses Jest with Supertest for API endpoint testing:
+
+```bash
+cd server
+
+# Install dependencies
+yarn install
+
+# Run all tests
+yarn test
+
+# Run tests in watch mode
+yarn test:watch
+
+# Run tests with coverage report
+yarn test:coverage
+```
+
+**Test Coverage:**
+
+- ✅ Authentication endpoints (login, token validation)
+- ✅ MCP protocol compliance (initialize, tools/list, tools/call)
+- ✅ Error handling (network errors, timeouts, invalid requests)
+- ✅ API key management
+- ✅ External API integration (Fake Store API)
+
+### Frontend Testing (React/Vitest)
+
+The frontend uses Vitest with React Testing Library:
+
+```bash
+cd client
+
+# Install dependencies
+yarn install
+
+# Run all tests
+yarn test
+
+# Run tests with UI interface
+yarn test:ui
+
+# Run tests with coverage report
+yarn test:coverage
+```
+
+**Test Coverage:**
+
+- ✅ Component rendering and interactions
+- ✅ Authentication flows (login, logout, protected routes)
+- ✅ Redux state management
+- ✅ Error boundary handling
+- ✅ User input validation
+- ✅ Navigation and routing
+
+### Python LLM Server Testing
+
+```bash
+cd llm-server
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install pytest for testing
+pip install pytest pytest-asyncio httpx
+
+# Run tests (when implemented)
+pytest
+```
+
+### Integration Testing
+
+To test the complete system integration:
+
+1. Start all services:
+
+   ```bash
+   # Terminal 1: Backend MCP Server
+   cd server && yarn dev
+
+   # Terminal 2: Python LLM Server
+   cd llm-server && python start.py
+
+   # Terminal 3: Frontend Client
+   cd client && yarn dev
+
+   # Terminal 4: ngrok (for external testing)
+   ngrok http 3000
+   ```
+
+2. Run the test scripts:
+   ```bash
+   cd server
+   ./test-mcp.sh        # Basic MCP connectivity
+   ./test-mcp-auth.sh   # Authentication flow
+   ./test-mcp-api-key.sh # API key management
+   ```
+
+### Test Data
+
+The application uses demo data from the Fake Store API:
+
+- **Demo User**: `johnd` / `m38rmF$`
+- **Products**: Electronics, jewelry, men's clothing, women's clothing
+- **Test Categories**: All categories from Fake Store API
+
+## Error Handling & Monitoring
+
+### Robust Error Handling
+
+**Backend:**
+
+- ✅ Comprehensive error middleware with structured error responses
+- ✅ Retry logic for external API calls with exponential backoff
+- ✅ Request timeout handling (30s for chat, 5s for API calls)
+- ✅ Rate limiting protection
+- ✅ JWT token validation and expiration handling
+- ✅ Graceful degradation for service unavailability
+
+**Frontend:**
+
+- ✅ Error boundary components to catch React errors
+- ✅ Toast notifications for user feedback
+- ✅ Automatic token refresh on 401 responses
+- ✅ Network connectivity detection
+- ✅ Loading states and error recovery
+- ✅ Form validation with user-friendly messages
+
+**Python LLM Server:**
+
+- ✅ Authentication error handling
+- ✅ LLM service initialization error recovery
+- ✅ MCP client connection error handling
+- ✅ Rate limiting and quota management
+
+### Error Categories
+
+1. **Authentication Errors** (401)
+
+   - Invalid credentials
+   - Expired tokens
+   - Missing authentication headers
+
+2. **Authorization Errors** (403)
+
+   - Insufficient permissions
+   - Invalid API keys
+
+3. **Validation Errors** (400)
+
+   - Missing required fields
+   - Invalid data formats
+   - Malformed requests
+
+4. **Network Errors**
+
+   - Connection timeouts
+   - Service unavailable
+   - DNS resolution failures
+
+5. **Rate Limiting** (429)
+
+   - API quota exceeded
+   - Too many requests
+
+6. **Server Errors** (500+)
+   - Internal server errors
+   - External API failures
+   - Database connection issues
 
 ### Environment Variables
 
@@ -381,13 +568,230 @@ const tools = [
 - **Free ngrok URLs change** on restart - consider paid plan for stable URLs
 - **Local development only** - not recommended for production traffic
 
+## Deployment
+
+### Local Development Deployment
+
+The recommended setup for local development with full AI integration:
+
+1. **Prerequisites**
+
+   ```bash
+   # Install required tools
+   brew install node yarn python ngrok  # macOS
+   # or use your system's package manager
+
+   # Sign up for services
+   # - ngrok account (free tier available)
+   # - OpenAI API key
+   ```
+
+2. **Environment Setup**
+
+   ```bash
+   # Clone repository
+   git clone <repository-url>
+   cd MCP-FakeStoreApi
+
+   # Backend setup
+   cd server
+   yarn install
+
+   # Frontend setup
+   cd ../client
+   yarn install
+
+   # Python LLM server setup
+   cd ../llm-server
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Configuration**
+
+   ```bash
+   # Set up ngrok authentication
+   ngrok config add-authtoken YOUR_AUTHTOKEN
+
+   # Configure environment variables (optional)
+   cd server
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+
+4. **Running the Complete System**
+
+   ```bash
+   # Terminal 1: MCP Backend Server
+   cd server && yarn dev
+   # ✅ Server running on http://localhost:3000
+
+   # Terminal 2: Python LLM Server
+   cd llm-server && python start.py
+   # ✅ LLM server running on http://localhost:8000
+
+   # Terminal 3: Frontend Client
+   cd client && yarn dev
+   # ✅ Frontend running on http://localhost:5173
+
+   # Terminal 4: ngrok Tunnel (for AI integration)
+   ngrok http 3000
+   # ✅ Public URL: https://abc123.ngrok.io
+   ```
+
+### Production Deployment
+
+#### Option 1: Traditional Server Deployment
+
+**Backend (Node.js):**
+
+```bash
+# Build and deploy
+cd server
+yarn build
+yarn start
+
+# With PM2 for process management
+npm install -g pm2
+pm2 start dist/index.js --name mcp-backend
+pm2 startup
+pm2 save
+```
+
+**Frontend (Static Site):**
+
+```bash
+# Build for production
+cd client
+yarn build
+
+# Deploy to static hosting (Netlify, Vercel, S3, etc.)
+# Upload dist/ folder contents
+```
+
+**Python LLM Server:**
+
+```bash
+cd llm-server
+
+# Option 1: Direct deployment
+pip install gunicorn
+gunicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Option 2: Docker deployment
+docker build -t mcp-llm-server .
+docker run -p 8000:8000 mcp-llm-server
+```
+
+#### Option 2: Docker Deployment
+
+Create a `docker-compose.yml`:
+
+```yaml
+version: "3.8"
+services:
+  backend:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  llm-server:
+    build: ./llm-server
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+
+  frontend:
+    build: ./client
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - llm-server
+```
+
+Deploy with: `docker-compose up -d`
+
+#### Option 3: Cloud Deployment
+
+**Recommended Cloud Platforms:**
+
+1. **Vercel** (Frontend + Serverless Functions)
+
+   - Frontend: Automatic deployment from Git
+   - Backend: Serverless functions in `/api`
+
+2. **Railway** (Full-stack)
+
+   - Automatic deployment from Git
+   - Built-in PostgreSQL if needed
+   - Custom domains included
+
+3. **Render** (Full-stack)
+
+   - Free tier available
+   - Automatic deployments
+   - Built-in SSL certificates
+
+4. **Google Cloud Platform**
+   - Cloud Run for containerized apps
+   - App Engine for traditional deployment
+   - Cloud Build for CI/CD
+
+### Deployment Checklist
+
+**Security:**
+
+- [ ] Environment variables configured
+- [ ] API keys secured (not in source code)
+- [ ] HTTPS enabled in production
+- [ ] CORS configured properly
+- [ ] Rate limiting enabled
+
+**Performance:**
+
+- [ ] Production builds created
+- [ ] Static assets cached
+- [ ] Database connections pooled
+- [ ] Error monitoring enabled
+
+**Monitoring:**
+
+- [ ] Health check endpoints working
+- [ ] Logging configured
+- [ ] Error tracking setup (Sentry, etc.)
+- [ ] Performance monitoring (if needed)
+
+**Testing:**
+
+- [ ] All tests passing
+- [ ] Integration tests verified
+- [ ] Load testing completed (if needed)
+
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes following the coding standards
+4. Add tests for new functionality
+5. Run the test suite: `yarn test`
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Submit a pull request
+
+### Development Guidelines
+
+- Follow TypeScript strict mode
+- Write tests for new features
+- Use semantic commit messages
+- Follow SOLID principles
+- Keep functions small and focused
+- Document complex logic
+- Use meaningful variable names
 
 ## License
 
