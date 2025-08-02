@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { createAgentService } from "../../services/langchainAgent";
-import type { LangChainAgentService } from "../../services/langchainAgent";
+import { chatService } from "../../services/chatService";
 import {
   ChatContainer,
   MessagesContainer,
@@ -23,9 +22,7 @@ import {
 import type { Message } from "./types";
 
 const ChatPage: React.FC = () => {
-  const { user, openaiApiKey, mcpApiKeys } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user, jwtToken } = useSelector((state: RootState) => state.auth);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -38,60 +35,28 @@ const ChatPage: React.FC = () => {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [agentReady, setAgentReady] = useState(false);
-  const agentServiceRef = useRef<LangChainAgentService | null>(null);
+  const [chatServiceReady, setChatServiceReady] = useState(false);
 
-  // Initialize agent service
+  // Check chat service availability
   useEffect(() => {
-    console.log("🔧 Setting up AI agent...");
-    const activeMcpKeys = mcpApiKeys.filter((key) => key.isActive);
-    console.log(
-      `🔑 Setup status: OpenAI=${!!openaiApiKey}, MCP=${activeMcpKeys.length}/${
-        mcpApiKeys.length
-      } active`
-    );
-
-    const getState = () => ({
-      auth: {
-        user,
-        openaiApiKey,
-        mcpApiKeys,
-        isAuthenticated: true,
-        jwtToken: null,
-        isLoading: false,
-        error: null,
-      },
-    });
-    agentServiceRef.current = createAgentService(getState);
-
-    // Check if agent is ready and initialize if needed
-    const checkAgentReady = async () => {
-      if (agentServiceRef.current) {
-        let ready = agentServiceRef.current.isReady();
-
-        // If not ready but can initialize, do it automatically
-        if (!ready && agentServiceRef.current.canInitialize()) {
-          try {
-            console.log("🔄 Auto-initializing agent...");
-            await agentServiceRef.current.initialize();
-            ready = agentServiceRef.current.isReady();
-            if (ready) {
-              console.log("✅ AI agent ready");
-            }
-          } catch (error) {
-            console.error("❌ Agent initialization failed:", error);
-          }
+    const checkChatService = async () => {
+      console.log("🔧 Checking chat service availability...");
+      try {
+        const isReady = await chatService.healthCheck();
+        setChatServiceReady(isReady);
+        if (isReady) {
+          console.log("✅ Chat service ready");
+        } else {
+          console.log("❌ Chat service not available");
         }
-
-        setAgentReady(ready);
-      } else {
-        console.log("❌ Agent service failed to create");
-        setAgentReady(false);
+      } catch (error) {
+        console.error("❌ Chat service check failed:", error);
+        setChatServiceReady(false);
       }
     };
 
-    checkAgentReady();
-  }, [openaiApiKey, mcpApiKeys, user]);
+    checkChatService();
+  }, []);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,11 +75,10 @@ const ChatPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (!agentServiceRef.current) {
-        throw new Error("Agent service not initialized");
-      }
-
-      const response = await agentServiceRef.current.sendMessage(inputMessage);
+      const response = await chatService.sendMessage(
+        inputMessage,
+        jwtToken || undefined
+      );
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -178,15 +142,15 @@ const ChatPage: React.FC = () => {
             placeholder={
               isLoading
                 ? "Processing your request..."
-                : agentReady
+                : chatServiceReady
                 ? "Type your message here..."
-                : "Setting up AI assistant..."
+                : "Connecting to AI assistant..."
             }
-            disabled={isLoading || !agentReady}
+            disabled={isLoading || !chatServiceReady}
           />
           <SendButton
             type="submit"
-            disabled={!inputMessage.trim() || isLoading || !agentReady}
+            disabled={!inputMessage.trim() || isLoading || !chatServiceReady}
           >
             {isLoading ? "Sending..." : "Send"}
           </SendButton>
@@ -194,11 +158,11 @@ const ChatPage: React.FC = () => {
 
         {/* Status indicator */}
         <StatusIndicator>
-          <StatusDot $isActive={agentReady && !isLoading} />
+          <StatusDot $isActive={chatServiceReady && !isLoading} />
           <StatusText>
             {isLoading
-              ? "AI is thinking..."
-              : agentReady
+              ? "AI assistant is thinking..."
+              : chatServiceReady
               ? "Ready - AI assistant connected"
               : "Connecting to AI assistant..."}
           </StatusText>

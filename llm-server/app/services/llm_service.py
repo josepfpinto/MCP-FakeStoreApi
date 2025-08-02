@@ -3,8 +3,9 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 from loguru import logger
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from app.config import settings
+from app.services.api_key_manager import api_key_manager
 
 
 class LLMService:
@@ -18,10 +19,16 @@ class LLMService:
 
         logger.info("LLMService instance created")
 
-    async def initialize(self):
-        """Initialize LLM and MCP client."""
+    async def initialize(self, user_id: Optional[str] = None):
+        """
+        Initialize LLM and MCP client.
+
+        Args:
+            user_id: User ID to get MCP API key from session storage.
+                    If None, will use environment variable (fallback mode)
+        """
         try:
-            logger.info("Initializing LLM Service...")
+            logger.info(f"Initializing LLM Service for user: {user_id or 'system'}")
 
             # Initialize OpenAI LLM
             self.llm = ChatOpenAI(
@@ -32,14 +39,27 @@ class LLMService:
             )
             logger.info("OpenAI LLM initialized")
 
+            # Get MCP API key - either from user session or environment
+            mcp_api_key = None
+            if user_id:
+                mcp_api_key = api_key_manager.get_mcp_api_key(user_id)
+                if not mcp_api_key:
+                    logger.warning(f"No valid MCP API key found for user {user_id}")
+                    # Could fallback to env variable or raise error
+                    raise ValueError(f"No valid MCP API key for user {user_id}")
+            else:
+                # Fallback to environment variable (for backward compatibility)
+                mcp_api_key = getattr(settings, 'mcp_api_key', None)
+                if not mcp_api_key:
+                    raise ValueError("No MCP API key available (neither from user session nor environment)")
+
             # Initialize MCP Client with streamable HTTP transport
-            # Using the configuration format from langchain-mcp-adapters
             self.mcp_client = MultiServerMCPClient({
                 "shopping": {
                     "transport": "streamable_http",
-                    "url": f"{settings.mcp_server_url}/mcp",  # Remove trailing slash
+                    "url": f"{settings.mcp_server_url}/mcp",
                     "headers": {
-                        "X-MCP-API-Key": settings.mcp_api_key
+                        "X-MCP-API-Key": mcp_api_key
                     }
                 }
             })

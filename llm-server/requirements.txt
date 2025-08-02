@@ -11,6 +11,9 @@ langgraph==0.2.69
 # HTTP Client for MCP Server Communication
 httpx==0.28.1
 
+# JWT Token Handling
+pyjwt==2.10.1
+
 # Configuration & Environment
 python-dotenv==1.0.1
 pydantic==2.10.4

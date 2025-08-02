@@ -15,7 +15,6 @@ import {
   InputWrapper,
   Input,
   ToggleButton,
-  HelperText,
   ErrorMessage,
   SubmitButton,
   LoadingSpinner,
@@ -24,7 +23,6 @@ import {
   DemoCredentials,
   DemoItem,
   DemoLabel,
-  WarningText,
 } from "./styled-components";
 import type { LoginFormData } from "./types";
 
@@ -32,10 +30,8 @@ const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormData>({
     username: "",
     password: "",
-    openaiApiKey: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -71,7 +67,7 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.username || !formData.password || !formData.openaiApiKey) {
+    if (!formData.username || !formData.password) {
       return;
     }
 
@@ -132,46 +128,13 @@ const LoginPage: React.FC = () => {
             </InputWrapper>
           </FieldGroup>
 
-          {/* OpenAI API Key Field */}
-          <FieldGroup>
-            <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
-            <InputWrapper>
-              <Input
-                type={showApiKey ? "text" : "password"}
-                id="openaiApiKey"
-                name="openaiApiKey"
-                value={formData.openaiApiKey}
-                onChange={handleInputChange}
-                placeholder="sk-..."
-                required
-                autoComplete="off"
-                $hasToggle
-              />
-              <ToggleButton
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-              >
-                {showApiKey ? "👁️" : "🙈"}
-              </ToggleButton>
-            </InputWrapper>
-            <HelperText>
-              Your API key will be stored locally and used for LangChain
-              integration
-            </HelperText>
-          </FieldGroup>
-
           {/* Error Message */}
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
           {/* Submit Button */}
           <SubmitButton
             type="submit"
-            disabled={
-              isLoading ||
-              !formData.username ||
-              !formData.password ||
-              !formData.openaiApiKey
-            }
+            disabled={isLoading || !formData.username || !formData.password}
           >
             {isLoading ? (
               <>
@@ -194,7 +157,6 @@ const LoginPage: React.FC = () => {
             <DemoItem>
               <DemoLabel>Password:</DemoLabel> m38rmF$
             </DemoItem>
-            <WarningText>⚠️ Use your own OpenAI API key</WarningText>
           </DemoCredentials>
         </DemoSection>
       </FormCard>

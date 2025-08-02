@@ -78,7 +78,6 @@ cp env-template .env
 Required environment variables:
 
 - `OPENAI_API_KEY`: Your OpenAI API key
-- `MCP_API_KEY`: MCP server API key (from step 3 above)
 - `MCP_SERVER_URL`: URL of your MCP server (default: ngrok tunnel)
 
 ### 5. Start Server

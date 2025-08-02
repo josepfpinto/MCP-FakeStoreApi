@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # MCP Server Configuration
     mcp_server_url: str = "https://29f37bbbb62f.ngrok-free.app"
-    mcp_api_key: str
+    mcp_api_key: Optional[str] = None  # Optional - will be fetched dynamically per user
 
     # LLM Server Configuration
     host: str = "0.0.0.0"

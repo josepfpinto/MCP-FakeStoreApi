@@ -54,10 +54,6 @@ const Navigation: React.FC = () => {
             💬 Chat
           </NavLink>
 
-          <NavLink to="/api-keys" $isActive={isActive("/api-keys")}>
-            🔑 API Keys
-          </NavLink>
-
           {/* User Menu */}
           <UserSection>
             <UserInfo>

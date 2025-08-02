@@ -9,7 +9,6 @@ import Layout from "./components/Layout";
 // Pages
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
-import ApiKeysPage from "./pages/ApiKeysPage";
 import ErrorPage from "./pages/ErrorPage";
 
 import "./App.css";
@@ -35,17 +34,6 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ChatPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/api-keys"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <ApiKeysPage />
               </Layout>
             </ProtectedRoute>
           }

@@ -7,6 +7,7 @@ import sys
 
 from app.config import settings
 from app.api.chat import router as chat_router
+from app.api.auth import router as auth_router
 from app.services.llm_service import llm_service
 from app.models.schemas import HealthResponse
 
@@ -54,6 +55,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(chat_router)
+app.include_router(auth_router)
 
 
 @app.get("/health", response_model=HealthResponse)
