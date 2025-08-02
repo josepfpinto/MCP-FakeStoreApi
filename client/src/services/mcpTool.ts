@@ -44,7 +44,7 @@ export class MCPShoppingTool extends Tool {
 
   constructor(
     getState: () => RootState,
-    baseUrl = "https://1d3654915de1.ngrok-free.app"
+    baseUrl = "https://29f37bbbb62f.ngrok-free.app"
   ) {
     super();
     this.getState = getState;

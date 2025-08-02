@@ -1,0 +1,20 @@
+# Web Framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# LLM & MCP Integration
+langchain-mcp-adapters==0.1.9
+langchain-openai==0.3.28
+langchain==0.3.27
+langgraph==0.2.69
+
+# HTTP Client for MCP Server Communication
+httpx==0.28.1
+
+# Configuration & Environment
+python-dotenv==1.0.1
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# Logging & Development
+loguru==0.7.3

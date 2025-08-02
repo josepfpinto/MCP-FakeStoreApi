@@ -204,6 +204,10 @@ export async function createMCPServer() {
         case "resources/read":
           result = await resourceHandlers.readResource({ method, params });
           break;
+        case "notifications/initialized":
+          // Handle MCP initialization notification (no response needed)
+          console.log("📡 MCP: Received initialized notification");
+          return res.status(200).end(); // Notifications don't need JSON response
         default:
           throw new Error(`Method ${method} not supported`);
       }

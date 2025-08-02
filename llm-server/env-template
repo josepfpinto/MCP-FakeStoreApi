@@ -1,0 +1,14 @@
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# MCP Server Configuration
+MCP_SERVER_URL=your_mcp_server_url_here
+MCP_API_KEY=your_mcp_api_key_here
+
+# LLM Server Configuration
+HOST=0.0.0.0
+PORT=8001
+DEBUG=True
+
+# CORS Configuration
+FRONTEND_URL=http://localhost:5173

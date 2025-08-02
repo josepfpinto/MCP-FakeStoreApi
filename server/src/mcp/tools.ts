@@ -113,25 +113,39 @@ export class ToolHandlers {
     console.log(`🔧 TOOL: Calling ${name} with args:`, args);
 
     try {
+      let result;
       switch (name) {
         case "search_products":
-          return await this.handleSearchProducts(args);
+          result = await this.handleSearchProducts(args);
+          break;
         case "add_to_cart":
-          return await this.handleAddToCart(args);
+          result = await this.handleAddToCart(args);
+          break;
         case "remove_from_cart":
-          return await this.handleRemoveFromCart(args);
+          result = await this.handleRemoveFromCart(args);
+          break;
         case "get_cart":
-          return await this.handleGetCart(args);
+          result = await this.handleGetCart(args);
+          break;
         case "get_categories":
-          return await this.handleGetCategories(args);
+          result = await this.handleGetCategories(args);
+          break;
         default:
           throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
       }
+
+      // Log the final response being sent to LLM
+      console.log(
+        `📤 TOOL RESPONSE (${name}):`,
+        JSON.stringify(result, null, 2)
+      );
+
+      return result;
     } catch (error: any) {
       console.error(`❌ TOOL: ${name} failed:`, error.message);
 
       // Return error as tool result (not exception)
-      return {
+      const errorResult = {
         content: [
           {
             type: "text",
@@ -140,6 +154,13 @@ export class ToolHandlers {
         ],
         isError: true,
       };
+
+      console.log(
+        `📤 TOOL ERROR RESPONSE (${name}):`,
+        JSON.stringify(errorResult, null, 2)
+      );
+
+      return errorResult;
     }
   }
 
