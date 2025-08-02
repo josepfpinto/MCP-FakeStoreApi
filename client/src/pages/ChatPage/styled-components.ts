@@ -142,12 +142,13 @@ export const StatusIndicator = styled.div`
   color: #6b7280;
 `;
 
-export const StatusDot = styled.div`
+export const StatusDot = styled.div<{ $isActive?: boolean }>`
   width: 0.5rem;
   height: 0.5rem;
-  background: #fbbf24;
+  background: ${({ $isActive }) => ($isActive ? "#10b981" : "#fbbf24")};
   border-radius: 50%;
   margin-right: 0.5rem;
+  transition: background-color 0.3s ease;
 `;
 
 export const StatusText = styled.span`

@@ -125,4 +125,5 @@ export interface CreateApiKeyResponse {
   name: string;
   key: string; // raw key (only returned once)
   createdAt: Date;
+  isActive: boolean;
 }

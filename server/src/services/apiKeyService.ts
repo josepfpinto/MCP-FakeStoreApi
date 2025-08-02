@@ -55,6 +55,7 @@ export function createApiKey(
     name: request.name,
     key: rawKey, // Only return raw key once
     createdAt: apiKey.createdAt,
+    isActive: apiKey.isActive,
   };
 }
 

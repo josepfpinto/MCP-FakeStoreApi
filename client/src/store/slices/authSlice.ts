@@ -269,7 +269,12 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.jwtToken = action.payload.token;
         state.openaiApiKey = action.payload.openaiApiKey;
-        state.mcpApiKeys = [action.payload.mcpApiKey];
+        // Ensure the API key has isActive property (backward compatibility)
+        const mcpApiKey = { ...action.payload.mcpApiKey };
+        if (mcpApiKey.isActive === undefined) {
+          mcpApiKey.isActive = true;
+        }
+        state.mcpApiKeys = [mcpApiKey];
         state.error = null;
         localStorage.setItem("jwtToken", action.payload.token);
         localStorage.setItem("openaiApiKey", action.payload.openaiApiKey);
@@ -282,7 +287,12 @@ const authSlice = createSlice({
     // Generate API key
     builder
       .addCase(generateApiKey.fulfilled, (state, action) => {
-        state.mcpApiKeys.push(action.payload);
+        // Ensure the API key has isActive property (backward compatibility)
+        const mcpApiKey = { ...action.payload };
+        if (mcpApiKey.isActive === undefined) {
+          mcpApiKey.isActive = true;
+        }
+        state.mcpApiKeys.push(mcpApiKey);
       })
       .addCase(generateApiKey.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -291,7 +301,11 @@ const authSlice = createSlice({
     // Fetch API keys
     builder
       .addCase(fetchApiKeys.fulfilled, (state, action) => {
-        state.mcpApiKeys = action.payload;
+        // Ensure all API keys have isActive property (backward compatibility)
+        state.mcpApiKeys = action.payload.map((key: ApiKey) => ({
+          ...key,
+          isActive: key.isActive !== undefined ? key.isActive : true,
+        }));
       })
       .addCase(fetchApiKeys.rejected, (state, action) => {
         state.error = action.payload as string;
