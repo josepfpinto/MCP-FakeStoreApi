@@ -509,7 +509,6 @@ The application uses demo data from the Fake Store API:
 **Frontend:**
 
 - ✅ Error boundary components to catch React errors
-- ✅ Toast notifications for user feedback
 - ✅ Automatic token refresh on 401 responses
 - ✅ Network connectivity detection
 - ✅ Loading states and error recovery

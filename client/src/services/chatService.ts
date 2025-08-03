@@ -83,7 +83,7 @@ export class ChatService {
                   "❌ The AI service is temporarily unavailable. Please try again in a few moments.",
                 is_error: true,
               };
-            default:
+            default: {
               // Server responded with error status
               const errorMessage =
                 errorData?.message ||
@@ -93,6 +93,7 @@ export class ChatService {
                 message: `❌ ${errorMessage}`,
                 is_error: true,
               };
+            }
           }
         } else if (error.request) {
           // Check for timeout
@@ -124,7 +125,7 @@ export class ChatService {
       // Generic error fallback
       return {
         message: `❌ An unexpected error occurred: ${
-          (error as any)?.message ?? "Unknown error"
+          (error as Error)?.message ?? "Unknown error"
         }. Please try again.`,
         is_error: true,
       };
