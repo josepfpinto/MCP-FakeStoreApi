@@ -252,3 +252,4 @@ coverage/
 tasks.md
 rules/
 .venv/
+llm-server/.venv/
