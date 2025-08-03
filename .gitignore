@@ -251,3 +251,4 @@ coverage/
 # Project specific
 tasks.md
 rules/
+.venv/
