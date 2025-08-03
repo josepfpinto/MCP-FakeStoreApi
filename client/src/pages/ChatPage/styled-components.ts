@@ -18,9 +18,7 @@ export const MessagesContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: calc(
-    100vh - 120px
-  ); /* Constrain height leaving space for input */
+  /* Remove max-height constraint to prevent double scrollbar */
 `;
 
 export const MessageGroup = styled.div<{ $sender: "user" | "assistant" }>`
