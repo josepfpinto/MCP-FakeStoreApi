@@ -45,7 +45,8 @@ export const MessageContent = styled.div<{ $sender: "user" | "assistant" }>`
 export const MessageBubble = styled.div<{ $sender: "user" | "assistant" }>`
   padding: 0.75rem 1rem;
   border-radius: 1rem;
-  background: ${({ $sender }) => ($sender === "user" ? "#2563eb" : "white")};
+  background: ${({ $sender }) =>
+    $sender === "user" ? "hsl(220, 13.6%, 8.6%)" : "white"};
   color: ${({ $sender }) => ($sender === "user" ? "white" : "#111827")};
   border: ${({ $sender }) =>
     $sender === "assistant" ? "1px solid #e5e7eb" : "none"};
@@ -72,7 +73,8 @@ export const Avatar = styled.div<{ $sender: "user" | "assistant" }>`
   justify-content: center;
   flex-shrink: 0;
   order: ${({ $sender }) => ($sender === "user" ? "1" : "2")};
-  background: ${({ $sender }) => ($sender === "user" ? "#2563eb" : "#e5e7eb")};
+  background: ${({ $sender }) =>
+    $sender === "user" ? "hsl(220, 13.6%, 8.6%)" : "#e5e7eb"};
   color: white;
   font-size: 0.75rem;
   font-weight: 500;
@@ -106,7 +108,7 @@ export const InputField = styled.input`
   &:focus {
     outline: none;
     border-color: transparent;
-    box-shadow: 0 0 0 2px #3b82f6;
+    box-shadow: 0 0 0 2px hsl(220, 13.6%, 8.6%);
   }
 
   &::placeholder {
@@ -121,7 +123,7 @@ export const InputField = styled.input`
 
 export const SendButton = styled.button`
   padding: 0.75rem 1.5rem;
-  background: #2563eb;
+  background: hsl(220, 13.6%, 8.6%);
   color: white;
   border-radius: 0.5rem;
   font-weight: 500;
@@ -130,12 +132,13 @@ export const SendButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: hsl(220, 13.6%, 8.6%);
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 2px hsl(220, 13.6%, 8.6%),
+      0 0 0 4px rgba(59, 130, 246, 0.1);
   }
 
   &:disabled {

@@ -7,7 +7,11 @@ const spin = keyframes`
 
 export const Container = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(247, 250, 252) 0%,
+    rgb(229, 230, 235) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,11 +20,11 @@ export const Container = styled.div`
 
 export const FormCard = styled.div`
   background: white;
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  box-shadow: 0 5px 10px -5px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 28rem;
-  padding: 2rem;
+  max-width: 360px;
+  padding: 20px;
 `;
 
 export const Header = styled.div`
@@ -29,10 +33,10 @@ export const Header = styled.div`
 `;
 
 export const Title = styled.h1`
-  font-size: 1.875rem;
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #111827;
-  margin-bottom: 0.5rem;
+  color: hsl(220, 11.8%, 20%);
+  margin-bottom: 0.4rem;
 `;
 
 export const Subtitle = styled.p`
@@ -53,10 +57,10 @@ export const FieldGroup = styled.div`
 
 export const Label = styled.label`
   display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
+  font-size: 0.975rem;
+  font-weight: 400;
+  color: #6b7280;
+  margin-bottom: 0.4rem;
 `;
 
 export const InputWrapper = styled.div`
@@ -69,14 +73,16 @@ export const Input = styled.input<{ $hasToggle?: boolean }>`
   padding-right: ${({ $hasToggle }) => ($hasToggle ? "3rem" : "1rem")};
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.975rem;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  background-color: rgb(247, 250, 252);
+  color: rgb(45, 49, 57);
 
   &:focus {
     outline: none;
-    border-color: transparent;
-    box-shadow: 0 0 0 2px #3b82f6;
+    border-color: #6b7280;
+    // box-shadow: 0 0 0 1px #6b7280;
   }
 
   &::placeholder {
@@ -109,17 +115,17 @@ export const HelperText = styled.p`
 `;
 
 export const ErrorMessage = styled.div`
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  // background: #fef2f2;
+  // border: 1px solid #fecaca;
   border-radius: 0.5rem;
   padding: 0.75rem;
-  color: #b91c1c;
-  font-size: 0.875rem;
+  color: rgb(152, 55, 55);
+  font-size: 0.975rem;
 `;
 
 export const SubmitButton = styled.button`
   width: 100%;
-  background: #2563eb;
+  background: hsl(220, 11.8%, 20%);
   color: white;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
@@ -133,16 +139,17 @@ export const SubmitButton = styled.button`
   gap: 0.5rem;
 
   &:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: hsl(220, 13.6%, 8.6%);
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 2px hsl(220, 13.6%, 8.6%),
+      0 0 0 4px rgba(59, 130, 246, 0.1);
   }
 
   &:disabled {
-    opacity: 0.5;
+    background: #d1d5db;
     cursor: not-allowed;
   }
 `;
@@ -159,14 +166,14 @@ export const LoadingSpinner = styled.div`
 export const DemoSection = styled.div`
   margin-top: 1.5rem;
   padding: 1rem;
-  background: #f9fafb;
+  background: rgb(247, 250, 252);
   border-radius: 0.5rem;
 `;
 
 export const DemoTitle = styled.p`
-  font-size: 0.875rem;
+  font-size: 0.975rem;
   color: #6b7280;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   margin-top: 0;
 `;
 
