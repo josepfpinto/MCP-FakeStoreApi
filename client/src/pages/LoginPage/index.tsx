@@ -25,6 +25,7 @@ import {
   DemoLabel,
 } from "./styled-components";
 import type { LoginFormData } from "./types";
+import EyeIcon from "../../components/EyeIcon/EyeIcon";
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -123,7 +124,7 @@ const LoginPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? "👁️" : "🙈"}
+                <EyeIcon show={showPassword} size="20px" />
               </ToggleButton>
             </InputWrapper>
           </FieldGroup>
